@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: Clinical-Med-Decision-Support
+Version: 0.1.0
+Summary: A production inspired clinical support backend  that evaluates synthetic prescriptions against configurable medical safety rules
+Requires-Python: >=3.13
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: uvicorn>=0.27.0
+Requires-Dist: pydantic>=2.6.0
+Requires-Dist: sqlalchemy>=2.0.0
+Requires-Dist: asyncpg>=0.29.0
+Requires-Dist: alembic>=1.13.0
+Requires-Dist: redis>=5.0.0
+Requires-Dist: pytest>=8.0.0
+Requires-Dist: httpx>=0.26.0

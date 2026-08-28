@@ -1,0 +1,18 @@
+[project]
+name = "Clinical-Med-Decision-Support"
+version = "0.1.0"
+description = "A production inspired clinical support backend  that evaluates synthetic prescriptions against configurable medical safety rules"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.110.0",  #This is  a framework used for building web APIs in Python.
+    "uvicorn>=0.27.0",  #This is a server that runs the FastAPI application
+    "pydantic>=2.6.0",  #This is used for data validation and defining the shape of the data
+    "sqlalchemy>=2.0.0", #This allows for interacting with databases using Pythin rather than manually writing every SQL query
+    "asyncpg>=0.29.0",   #This handles communication with postgreSQL
+    "alembic>=1.13.0",   #This handles database migrations which allows you to update existing databases safely
+    "redis>=5.0.0",      #This is an in-memory data storage
+    "pytest>=8.0.0",     #This is a testing framework 
+    "httpx>=0.26.0"     #This is a Python HTTP client. This allows your python application to make requests to other APIs.
+
+
+]
