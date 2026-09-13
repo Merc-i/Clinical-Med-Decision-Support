@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import Boolean, Column, Float,  DateTime, ForeignKey,  Integer, String, Text
+from sqlalchemy import Boolean, Column, Date,  Float,  DateTime, ForeignKey,  Integer, String, Text
 from sqlalchemy.orm import declarative_base, relationship
 
 
@@ -11,7 +11,7 @@ class PatientModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String(50),  nullable=False)
     last_name = Column(String(50), nullable = False)
-    date_of_birth = Column(String(10), nullable=False)
+    date_of_birth = Column(Date, nullable=False)
     created_at = Column(DateTime, default = lambda: datetime.now(timezone.utc), nullable=False)
 
     #Relationships
@@ -45,6 +45,7 @@ class PatientMedication(Base):
     frequency = Column(String(50), nullable=False)
     start_date = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     end_date = Column(DateTime, nullable=True)
+    active = Column(Boolean, default=True, nullable=False, index=True)
 
     #Relationships
     patient = relationship("PatientModel", back_populates="patient_medications")
@@ -57,7 +58,7 @@ class PatientAllergyModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
     allergy_substance = Column(String(100), nullable=False)
-    severity = Column(String(50), nullable=False)
+    severity = Column(String(50), nullable=True)
     reaction = Column(Text, nullable=True)
 
     patient = relationship("PatientModel", back_populates="allergies")
