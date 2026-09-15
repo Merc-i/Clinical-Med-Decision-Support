@@ -14,7 +14,7 @@ class PrescriptionCreate(BaseModel):
     frequency: str = Field(min_length=1)
 
 class SafetyAlert(BaseModel):
-    rule_id: int
+    rule_id: str
     rule_type : str
     severity : Literal["low", "moderate", "high", "critical"]
     message : str
@@ -25,6 +25,8 @@ class EvaluationResponse(BaseModel):
     risk_score: float = Field(ge=0)
     alerts: list[SafetyAlert] 
 
+
+    
 
 
 
