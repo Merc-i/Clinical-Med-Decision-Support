@@ -1,10 +1,13 @@
 from enum import Enum
-
 from typing import Any, Protocol
 
-from schemas import  PrescriptionCreate, SafetyAlert
+from schemas import PrescriptionCreate, SafetyAlert
+from synthetic_rules import (
+    find_drug_interaction,
+    get_dosage_limit,
+    get_therapeutic_category,
+)
 
-from synthetic_rules import find_drug_interaction, get_dosage_limit, get_therapeuric_category
 
 class Severity(str, Enum):
     LOW = "low"
@@ -18,18 +21,17 @@ class BaseRule(Protocol):
     rule_type: str
 
     def evaluate(self, context):
-        {
+        raise NotImplementedError
 
-        }
 
 class EvaluationContext:
     def __init__(
-            self,
-            patient: Any,
-            prescription: PrescriptionCreate,
-            medication: Any,
-            current_medications: list[Any],
-            allergies: list[Any],
+        self,
+        patient: Any,
+        prescription: PrescriptionCreate,
+        medication: Any,
+        current_medications: list[Any],
+        allergies: list[Any],
     ):
         self.patient = patient
         self.prescription = prescription
@@ -38,23 +40,26 @@ class EvaluationContext:
         self.allergies = allergies
 
 
-
-
 class AllergyRule:
     rule_id = "allergy_check"
     rule_type = "allergy"
 
     def evaluate(self, context):
         for allergy in context.allergies:
-            if allergy.allergy_substance.lower() == context.medication.name.lower():
+           medication_name = context.medication.name.lower()
+           drug_class = getattr(context.medication, "drug_class", None)
+
+           if allergy.allergy_substance.lower() in medication_name or (
+                drug_class and allergy.allergy_substance.lower() in drug_class.lower()
+            ):
                 return SafetyAlert(
                     rule_id=self.rule_id,
-                    rule_type = self.rule_type,
+                    rule_type=self.rule_type,
                     severity="critical",
                     message=(
-                        f"Proposed medication conflicts with documented"
-                        f" allergy: {allergy.allergy_substance}."
-                    )
+                        f"Proposed medication conflicts with documented allergy: "
+                        f"{allergy.allergy_substance}."
+                    ),
                 )
         return None
 
@@ -76,8 +81,9 @@ class DrugInteractionRule:
             rule_id=self.rule_id,
             rule_type=self.rule_type,
             severity=interaction["severity"],
-            message=interaction["message"]
+            message=interaction["message"],
         )
+
 
 class DosageRule:
     rule_id = "dosage_check"
@@ -91,20 +97,18 @@ class DosageRule:
 
         dosage = context.prescription.dosage
 
-        if  dosage.unit != limit["unit"]:
+        if dosage.unit != limit["unit"]:
             return None
 
         if dosage.amount > limit["max_amount"]:
             return SafetyAlert(
-                rule_id = self.rule_id,
-                rule_type = self.rule_type,
-                severity = "high",
+                rule_id=self.rule_id,
+                rule_type=self.rule_type,
+                severity="high",
                 message=(
-                    "Proposed dosage exceeds the amount documented"
-                    f"limit of {limit['max_amount']}  {limit['unit']}"
+                    "Proposed dosage exceeds the documented limit of "
+                    f"{limit['max_amount']} {limit['unit']}"
                 ),
-
-                
             )
         return None
 
@@ -114,30 +118,26 @@ class DuplicateTherapyRule:
     rule_type = "duplicate_therapy"
 
     def evaluate(self, context):
-        proposed_category = get_therapeuric_category(
-            context.medication.name
-        )
+        proposed_category = get_therapeutic_category(context.medication.name)
 
         if proposed_category is None:
             return None
 
         for medication in context.current_medications:
-            current_category = get_therapeuric_category(
-                medication.name
-            )
+            current_category = get_therapeutic_category(medication.name)
 
             if current_category == proposed_category:
-                    return SafetyAlert(
-                        rule_id=self.rule_id,
-                        rule_type=self.rule_type,
-                        severity="moderate",
-                        message=(
-                            "Proposed medication belongs to the same  therapeutic category as an "
-                            f"existing medication: {proposed_category}."
-                        ),
-                    )
+                return SafetyAlert(
+                    rule_id=self.rule_id,
+                    rule_type=self.rule_type,
+                    severity="moderate",
+                    message=(
+                        "Proposed medication belongs to the same therapeutic category as an "
+                        f"existing medication: {proposed_category}."
+                    ),
+                )
 
-            return None 
+        return None
 
 
 RISK_SCORES = {
@@ -157,20 +157,17 @@ class DecisionEngine:
 
         for rule in self.rules:
             result = rule.evaluate(context)
-
             if result is not None:
                 alerts.append(result)
 
         decision = self.aggregate_decision(alerts)
         risk_score = self.calculate_risk_score(alerts)
 
-        return  decision, risk_score, alerts
-
+        return decision, risk_score, alerts
 
     def aggregate_decision(self, alerts):
         if not alerts:
             return "PASS"
-
 
         severities = {alert.severity for alert in alerts}
 
@@ -180,11 +177,5 @@ class DecisionEngine:
         return "WARNING"
 
     def calculate_risk_score(self, alerts):
-        return sum(
-            RISK_SCORES.get(alert.severity, 0)
-            for alert in alerts
-    )
-
-
-    
+        return sum(RISK_SCORES.get(alert.severity, 0) for alert in alerts)
 

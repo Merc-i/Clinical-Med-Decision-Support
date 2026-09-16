@@ -5,9 +5,9 @@ SYNTHETIC_DRUG_INTERACTIONS = {
 
     },
 
-    ("simvastatin", "clarithomycin"): {
+    ("simvastatin", "clarithromycin"): {
         "severity" : "high",
-        "message" : "Concurrent use of simvastatin and clarithomycin may increase the risk of myopathy."
+        "message" : "Concurrent use of simvastatin and clarithromycin may increase the risk of myopathy."
     },
 }
 
@@ -38,7 +38,7 @@ SYNTHETIC_DOSAGE_LIMITS = {
         "unit": "mg",
 
     },
-    "ibruprofen": {
+    "ibuprofen": {
         "max_amount" : 800,
         "unit" : "mg",
     },
@@ -56,10 +56,10 @@ def get_dosage_limit(medication_name):
 
 SYNTHETIC_THERAPEUTIC_CATEGORIES = {
     "warfarin": "anticoagulent",
-    "ibruprofen": "nsaid",
+    "ibuprofen": "nsaid",
     "simvastatin": "statin",
     "clarithromycin": "macrolide_antibiotic",
 }
 
-def get_therapeuric_category(medication_name):
+def get_therapeutic_category(medication_name):
     return SYNTHETIC_THERAPEUTIC_CATEGORIES.get(medication_name.lower())
