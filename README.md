@@ -40,7 +40,7 @@ Safety Rules
         ↓
 Decision Engine
         ↓
-Decision + Risk Score + Alerts
+Decision and Risk Score and Alerts
 
 The current decision logic is:
 
