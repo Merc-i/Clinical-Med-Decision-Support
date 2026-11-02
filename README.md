@@ -52,6 +52,19 @@ HIGH / CRITICAL     → REJECT
 
 These rules and risk scores are synthetic prototype conventions and are not clinically validated.
 
+## Redis caching
+
+Redis caches repeatedly medication lookups using normalised medication pair keys.
+
+- Cache hits return previously stored results
+- Cache misses retrieve results from the synthetic interaction database and cache them.
+- Cache results expire after 300 seconds (5 minutes) to reduce stale data.
+- Redis tracks cache hits and misses.
+- If Redis is unavailable, the system falls back to the source dataset
+
+The synthetic interaction dataset remains the source of truth, while Redis stores temporary copies.
+
+
 ## Technology Stack
 
 - Python
@@ -146,6 +159,8 @@ The project is still being developed. Planned improvements include:
 - Improved error handling
 - Authentication and authorization
 - Further infrastructure and deployment improvements
+
+
 
 ## Disclaimer
 
